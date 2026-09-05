@@ -1,0 +1,1397 @@
+/*
+  Design tokens.
+
+  Palette: ANW's own warm neutrals, cream and brass over espresso. This is the
+  brand's existing colour, kept deliberately rather than reached for by default.
+
+  One accent colour for the whole page. One radius scale. One theme, light or dark
+  by system preference, never inverted section by section.
+
+  Two accent tokens, not one: brass (--accent) carries enough contrast for fills,
+  rules and large shapes, but fails WCAG AA as small text on cream (3.3:1). Small
+  copy uses --accent-strong, a deeper bronze from the same family, at 6.8:1.
+*/
+:root {
+  --bg: #f4efe7;
+  --bg-deep: #e8ddcf;
+  --surface: #fffaf4;
+  --surface-2: #e8ddcf;
+  --text: #1a1715;
+  --muted: rgba(26, 23, 21, 0.68);
+  --line: rgba(36, 30, 26, 0.13);
+  --line-strong: rgba(36, 30, 26, 0.26);
+  --accent: #a57c52;
+  --accent-strong: #6f4a22;
+  --accent-ink: #1a1715;
+  --accent-soft: rgba(165, 124, 82, 0.14);
+  --shadow: 0 24px 70px rgba(52, 38, 26, 0.16);
+
+  /* Fed into the WebGL scenes so 3D follows the page theme. */
+  --scene-beam: #8a7a68;
+  --scene-accent: #a57c52;
+  --scene-plate: #b3a695;
+  --scene-shell: #c9bda9;
+  --scene-interior: #d9cbb5;
+  --scene-soft: #b09a80;
+
+  --radius: 2px;
+  --nav-height: 72px;
+  --gutter: clamp(1.25rem, 5vw, 5.5rem);
+  --section-y: clamp(5rem, 9vw, 8.5rem);
+  --max-width: 1440px;
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
+
+  color-scheme: light;
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* Dark mode stays in the same warm family: espresso rather than cool graphite,
+   with the brass lifted so it holds contrast against a dark ground. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16120f;
+    --bg-deep: #100d0b;
+    --surface: #1f1a16;
+    --surface-2: #2a231d;
+    --text: #f0e9e0;
+    --muted: rgba(240, 233, 224, 0.68);
+    --line: rgba(240, 233, 224, 0.15);
+    --line-strong: rgba(240, 233, 224, 0.3);
+    --accent: #c9a06a;
+    --accent-strong: #d9b586;
+    --accent-ink: #16120f;
+    --accent-soft: rgba(201, 160, 106, 0.16);
+    --shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+
+    --scene-beam: #9a8a76;
+    --scene-accent: #c9a06a;
+    --scene-plate: #6a5c4c;
+    --scene-shell: #4a3f34;
+    --scene-interior: #cbbca4;
+    --scene-soft: #96836c;
+
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+/* Scaled for an eight-word headline on two lines. Display sizes above this turn
+   the hero into a four-line block, which is a font-size error, not a copy error. */
+h1 {
+  font-size: clamp(2.15rem, 4.5vw, 4.1rem);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+h3 {
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+  line-height: 1.62;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.line > span {
+  display: block;
+}
+
+.section {
+  padding: var(--section-y) var(--gutter);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Reading progress ------------------------------------------------------- */
+.read-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 40;
+  background: var(--line);
+}
+
+.read-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* Navigation ------------------------------------------------------------- */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0 var(--gutter);
+  transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.nav.is-scrolled {
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--line);
+}
+
+.nav__brand {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: 1rem;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.9rem);
+}
+
+.nav__link {
+  position: relative;
+  background: none;
+  border: 0;
+  padding: 0.4rem 0;
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--muted);
+  transition: color 0.25s ease;
+  white-space: nowrap;
+}
+
+.nav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav__link:hover,
+.nav__link.is-active {
+  color: var(--text);
+}
+
+.nav__link.is-active::after {
+  transform: scaleX(1);
+}
+
+.nav__toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.button {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.95rem 1.6rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.button:hover {
+  background: color-mix(in srgb, var(--accent) 86%, var(--text));
+}
+
+.button:active {
+  transform: scale(0.985);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.button--ghost:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* Hero ------------------------------------------------------------------- */
+/* Hero.
+
+   In scrub mode the section is a tall scroll track: the viewport inside it pins,
+   the film advances with the scroll, and when it finishes the pin releases and
+   the page moves on. Without scrub (phones, reduced motion) the section is a
+   single viewport with the video looping behind it. */
+.hero {
+  position: relative;
+}
+
+.hero--scrub {
+  height: 360vh;
+}
+
+.hero__viewport {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  align-items: end;
+  padding: calc(var(--nav-height) + 2rem) var(--gutter) clamp(3rem, 8vh, 6rem);
+}
+
+.hero__video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-deep);
+}
+
+/* Keeps the copy legible over whatever frame the scrub lands on, and resolves to
+   solid page colour at the base so the hero hands off to the next section cleanly. */
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg) 62%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 8%, transparent) 24%,
+    color-mix(in srgb, var(--bg) 58%, transparent) 48%,
+    color-mix(in srgb, var(--bg) 93%, transparent) 68%,
+    var(--bg) 100%
+  );
+}
+
+.hero__content {
+  position: relative;
+  z-index: 2;
+  /* Wide enough that the display headline never wraps past two lines. */
+  max-width: min(56rem, 100%);
+  display: grid;
+  gap: 1.5rem;
+  justify-items: start;
+}
+
+.hero__body {
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  max-width: 46ch;
+}
+
+/* Statement -------------------------------------------------------------- */
+.statement {
+  padding: var(--section-y) var(--gutter);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.statement__type {
+  font-size: clamp(2.4rem, 7vw, 6rem);
+  line-height: 1.02;
+  max-width: 16ch;
+}
+
+.statement__body {
+  justify-self: end;
+  max-width: 44ch;
+  font-size: 1.02rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+
+/* Services rail ---------------------------------------------------------- */
+/* The panel reads as a distinct surface, but its edges fade into the page instead
+   of ending on a hard rule, so the handoff out of the pin has no visible seam. */
+.rail-section {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    var(--surface) 7%,
+    var(--surface) 90%,
+    var(--bg) 100%
+  );
+}
+
+/* Deliberately short of a full viewport. A pinned panel has to clear the screen
+   after its pan finishes, and every pixel of that is static; keeping the panel
+   under 100dvh shortens the hold and lets the next section start arriving. */
+.rail-section__inner {
+  height: 86dvh;
+  min-height: 38rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.75rem, 4vw, 3rem);
+  padding: clamp(2rem, 5vh, 3.5rem) 0;
+  overflow: hidden;
+}
+
+/* Full-bleed heading: this line is the section's whole argument, so it runs the
+   width of the page rather than sitting in a narrow measure. */
+.rail-section__header {
+  padding-inline: var(--gutter);
+  max-width: none;
+}
+
+.rail-section__header h2 {
+  max-width: none;
+  text-wrap: pretty;
+  font-size: clamp(2.1rem, 5.4vw, 4.6rem);
+}
+
+.rail {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  padding-inline: var(--gutter);
+  will-change: transform;
+}
+
+.rail-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  flex: 0 0 auto;
+  width: clamp(16rem, 23vw, 20rem);
+  min-height: 21rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding: clamp(1.4rem, 2vw, 1.9rem);
+  border-radius: var(--radius);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Staggered drop gives the track a rhythm instead of one flat row of boxes. */
+.rail-card:nth-child(even) {
+  margin-top: clamp(2rem, 6vw, 5rem);
+}
+
+.rail-card:hover {
+  transform: translateY(-6px);
+}
+
+.rail-card h3 {
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+}
+
+.rail-card p {
+  font-size: 0.92rem;
+}
+
+/* Media cards: larger, carrying real footage under a scrim. */
+.rail-card--media {
+  width: clamp(19rem, 30vw, 26rem);
+  min-height: 27rem;
+}
+
+.rail-card__media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  display: block;
+  background: var(--surface-2);
+}
+
+.rail-card__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rail-card--media:hover .rail-card__video {
+  transform: scale(1.06);
+}
+
+.rail-card--media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to top, rgba(18, 14, 11, 0.94) 4%, rgba(18, 14, 11, 0.5) 46%, rgba(18, 14, 11, 0.08) 100%);
+}
+
+/* Fixed light copy: it sits on footage, not on the page surface, in both themes. */
+.rail-card--media h3 {
+  color: #fbf7f1;
+}
+
+.rail-card--media p {
+  color: rgba(251, 247, 241, 0.82);
+}
+
+/* Typographic cards: a warm material wash and a rule that draws on hover. */
+.rail-card--text {
+  border: 1px solid var(--line);
+  background: linear-gradient(158deg, var(--surface) 0%, var(--bg) 55%, var(--surface-2) 100%);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.rail-card--text:hover {
+  border-color: var(--accent);
+}
+
+.rail-card__rule {
+  display: block;
+  height: 2px;
+  width: 2.75rem;
+  margin-bottom: 0.6rem;
+  background: var(--accent);
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rail-card--text:hover .rail-card__rule {
+  width: 100%;
+}
+
+/* Split sections --------------------------------------------------------- */
+.split {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.split__copy {
+  display: grid;
+  gap: 1.4rem;
+  position: sticky;
+  top: calc(var(--nav-height) + 3rem);
+}
+
+.split__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.split__video,
+.about__video,
+.process__video,
+.project__video,
+.modal__video,
+.before-after__media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.stack-list {
+  display: grid;
+  gap: 1.6rem;
+  margin-top: 1rem;
+}
+
+.stack-list__item {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+.stack-list__item p {
+  font-size: 0.94rem;
+}
+
+/* Section headers -------------------------------------------------------- */
+.section-header {
+  display: grid;
+  gap: 1rem;
+  max-width: 34ch;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.section-header__body {
+  font-size: 1rem;
+  max-width: 48ch;
+}
+
+/* Pinned 3D build sequence ----------------------------------------------- */
+.sequence-section {
+  padding: var(--section-y) 0 0;
+}
+
+.sequence-section .section-header {
+  padding-inline: var(--gutter);
+  margin-inline: auto;
+  max-width: var(--max-width);
+}
+
+.sequence {
+  height: 340vh;
+  position: relative;
+}
+
+/* Reserves the scene's space before the WebGL chunk arrives, so nothing shifts. */
+.sequence--loading {
+  background: var(--bg-deep);
+  border-block: 1px solid var(--line);
+}
+
+.sequence__viewport {
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-deep);
+  border-block: 1px solid var(--line);
+}
+
+.sequence__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.sequence__canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrim: the captions sit over a scene that runs from dark structure to a bright
+   warm interior, so the copy needs its own ground to stay readable throughout. */
+.sequence__viewport::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 60%;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--bg-deep) 92%, transparent) 0%,
+    color-mix(in srgb, var(--bg-deep) 70%, transparent) 34%,
+    transparent 100%
+  );
+}
+
+.sequence__captions {
+  position: absolute;
+  z-index: 1;
+  left: var(--gutter);
+  bottom: clamp(2.5rem, 8vh, 5rem);
+  width: min(34ch, calc(100% - var(--gutter) * 2));
+  display: grid;
+}
+
+.sequence__caption {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: 0.7rem;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.sequence__caption.is-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sequence__label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.sequence__caption p {
+  font-size: 0.96rem;
+}
+
+/* Projects --------------------------------------------------------------- */
+.projects__grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(1rem, 2.5vw, 2.25rem);
+}
+
+.project {
+  position: relative;
+  display: grid;
+  /* Rows hug their content, so a shorter card never opens a gap between the
+     media and its caption when a taller neighbour sets the row height. */
+  align-content: start;
+  gap: 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.project:nth-child(1) {
+  grid-column: span 7;
+}
+
+.project:nth-child(2) {
+  grid-column: span 5;
+  align-self: end;
+}
+
+.project:nth-child(3) {
+  grid-column: span 5;
+}
+
+.project:nth-child(4) {
+  grid-column: span 7;
+  align-self: end;
+}
+
+.project:nth-child(5) {
+  grid-column: span 8;
+  justify-self: center;
+}
+
+.project__media {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  aspect-ratio: 16 / 10;
+}
+
+.project:nth-child(2) .project__media,
+.project:nth-child(3) .project__media {
+  aspect-ratio: 4 / 5;
+}
+
+.project__video {
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project:hover .project__video {
+  transform: scale(1.04);
+}
+
+.project__body {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.project__type {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.project__title {
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.project__summary {
+  font-size: 0.92rem;
+  color: var(--muted);
+  max-width: 44ch;
+}
+
+/* Before and after ------------------------------------------------------- */
+.compare {
+  display: grid;
+  grid-template-columns: 4fr 8fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.compare__copy {
+  display: grid;
+  gap: 1rem;
+}
+
+.before-after {
+  position: relative;
+  /* Matches the source photographs, so neither frame is cropped. */
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  touch-action: pan-y;
+  cursor: ew-resize;
+}
+
+.before-after__layer {
+  position: absolute;
+  inset: 0;
+}
+
+.before-after__legend {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f5f6f8;
+  background: linear-gradient(0deg, rgba(6, 8, 12, 0.72), transparent);
+  pointer-events: none;
+}
+
+.before-after__handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+
+.before-after__knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.before-after__range {
+  position: absolute;
+  inset: auto 0 0 0;
+  width: 100%;
+  opacity: 0;
+  height: 2.5rem;
+  cursor: ew-resize;
+}
+
+.before-after__range:focus-visible {
+  opacity: 1;
+}
+
+/* Process ---------------------------------------------------------------- */
+.process__layout {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.process__media {
+  position: sticky;
+  top: calc(var(--nav-height) + 3rem);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.process__steps {
+  position: relative;
+  padding-left: 2.25rem;
+}
+
+.process__line {
+  position: absolute;
+  left: 0;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 1px;
+  background: var(--line);
+}
+
+.process__line span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+}
+
+.process__steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(2rem, 4vw, 3.25rem);
+}
+
+.process__step {
+  display: grid;
+  gap: 0.55rem;
+  position: relative;
+}
+
+.process__step::before {
+  content: '';
+  position: absolute;
+  left: -2.25rem;
+  top: 0.55rem;
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  transform: translateX(-3px);
+}
+
+.process__step p {
+  font-size: 0.95rem;
+}
+
+/* About and quotes ------------------------------------------------------- */
+.about {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.about__media {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.about__copy {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.quotes {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.quote {
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+.quote blockquote {
+  margin: 0;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  max-width: 48ch;
+}
+
+.quote figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.quote figcaption span:first-child {
+  color: var(--text);
+}
+
+/* Contact ---------------------------------------------------------------- */
+.contact {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.contact__copy {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.contact__details {
+  display: grid;
+  gap: 1.1rem;
+  margin: 1rem 0 0;
+}
+
+.contact__details div {
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.contact__details dt {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.contact__details dd {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.contact-form__wide {
+  grid-column: 1 / -1;
+}
+
+.contact-form input,
+.contact-form textarea {
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.85rem 0.95rem;
+  width: 100%;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: color-mix(in srgb, var(--text) 52%, transparent);
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: var(--bg);
+}
+
+.contact-form textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.contact-form .button {
+  justify-self: start;
+}
+
+/* Honeypot fields: off-screen rather than display:none, which some bots skip. */
+.contact-form__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.contact-form__status {
+  grid-column: 1 / -1;
+  font-size: 0.88rem;
+  color: var(--accent-strong);
+  min-height: 1.2rem;
+}
+
+/* Footer ----------------------------------------------------------------- */
+.footer {
+  padding: clamp(3rem, 6vw, 5rem) var(--gutter) 2.5rem;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 2.5rem;
+}
+
+.footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.footer__brand {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.footer__links button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--muted);
+  transition: color 0.25s ease;
+}
+
+.footer__links button:hover {
+  color: var(--accent-strong);
+}
+
+.footer__legal {
+  font-size: 0.8rem;
+}
+
+/* Project modal ---------------------------------------------------------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--bg-deep) 82%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.modal__panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  width: min(1080px, 100%);
+  max-height: 86dvh;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.modal__content {
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.modal__close {
+  justify-self: end;
+  background: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.modal__type,
+.modal__meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.modal__meta {
+  color: var(--muted);
+}
+
+/* Mobile menu ------------------------------------------------------------ */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: var(--bg);
+  display: grid;
+  align-content: center;
+  gap: 0.5rem;
+  padding: var(--gutter);
+}
+
+.mobile-menu__link {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 1.6rem;
+  letter-spacing: -0.02em;
+  animation: menu-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Responsive ------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .modal__panel {
+    grid-template-columns: 1fr;
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+
+  .modal__video {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav__links {
+    display: none;
+  }
+
+  .nav__toggle {
+    display: block;
+  }
+
+  .split,
+  .compare,
+  .about,
+  .contact,
+  .process__layout,
+  .contact-form {
+    grid-template-columns: 1fr;
+  }
+
+  .split__copy,
+  .process__media {
+    position: static;
+  }
+
+  .split__media,
+  .about__media,
+  .process__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .statement__body {
+    justify-self: start;
+  }
+
+  .projects__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project:nth-child(n) {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    align-self: stretch;
+  }
+
+  .project:nth-child(2) .project__media,
+  .project:nth-child(3) .project__media {
+    aspect-ratio: 16 / 10;
+  }
+
+  /* The rail is not pinned on phones, so it scrolls natively with snap points and
+     the panel takes its height from content rather than the viewport. */
+  .rail-section__inner {
+    height: auto;
+    min-height: 0;
+  }
+
+  .rail {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--gutter);
+    padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .rail-card,
+  .rail-card--media {
+    width: 78vw;
+    min-height: 22rem;
+    scroll-snap-align: start;
+  }
+
+  /* The staggered drop needs room the phone rail does not have. */
+  .rail-card:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .sequence {
+    height: 300vh;
+  }
+
+  .sequence__captions {
+    right: var(--gutter);
+    width: auto;
+  }
+}
+
+/* Reduced motion --------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The 3D scenes render a single static frame, so the tall scroll wrapper
+     collapses and every caption is shown at once.
+
+     The canvas container needs a definite height here. With an auto height, the
+     canvas (width/height 100%) resolves against its own drawing buffer, the
+     ResizeObserver re-measures the larger box, and the section grows without
+     bound on every frame. */
+  .sequence {
+    height: auto;
+  }
+
+  .sequence__viewport {
+    height: auto;
+  }
+
+  .sequence__viewport::after {
+    display: none;
+  }
+
+  .sequence__canvas {
+    position: relative;
+    height: 62vh;
+  }
+
+  .sequence__captions {
+    position: static;
+    width: auto;
+    padding: var(--gutter);
+    display: grid;
+    gap: 2rem;
+  }
+
+  .sequence__caption {
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+  }
+
+  .read-progress span {
+    transform: scaleX(1);
+  }
+}
