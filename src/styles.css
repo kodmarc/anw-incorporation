@@ -1,43 +1,45 @@
 /*
   Design tokens.
 
-  Palette: ANW's own warm neutrals, cream and brass over espresso. This is the
-  brand's existing colour, kept deliberately rather than reached for by default.
+  Palette: sampled directly out of the ANW Incorporation logo artwork, not matched
+  by eye. Navy #012550 and grey #525152 are the two dominant opaque colours in the
+  file.
+
+  Both clear WCAG AA on a light ground (navy 15.2:1, grey 7.9:1), so unlike the
+  previous brass the accent needs no separate small-text variant. --accent-strong
+  differs only in dark mode, where the brand navy would vanish into the background
+  and has to be lifted.
 
   One accent colour for the whole page. One radius scale. One theme, light or dark
   by system preference, never inverted section by section.
-
-  Two accent tokens, not one: brass (--accent) carries enough contrast for fills,
-  rules and large shapes, but fails WCAG AA as small text on cream (3.3:1). Small
-  copy uses --accent-strong, a deeper bronze from the same family, at 6.8:1.
 */
 :root {
-  --bg: #f4efe7;
-  --bg-deep: #e8ddcf;
-  --surface: #fffaf4;
-  --surface-2: #e8ddcf;
-  --text: #1a1715;
-  --muted: rgba(26, 23, 21, 0.68);
-  --line: rgba(36, 30, 26, 0.13);
-  --line-strong: rgba(36, 30, 26, 0.26);
-  --accent: #a57c52;
-  --accent-strong: #6f4a22;
-  --accent-ink: #1a1715;
-  --accent-soft: rgba(165, 124, 82, 0.14);
-  --shadow: 0 24px 70px rgba(52, 38, 26, 0.16);
+  --bg: #f2f4f7;
+  --bg-deep: #e3e8ee;
+  --surface: #fbfcfd;
+  --surface-2: #e6eaf0;
+  --text: #101d2e;
+  --muted: rgba(16, 29, 46, 0.68);
+  --line: rgba(1, 37, 80, 0.14);
+  --line-strong: rgba(1, 37, 80, 0.28);
+  --accent: #012550;
+  --accent-strong: #012550;
+  --accent-ink: #fbfcfd;
+  --accent-soft: rgba(1, 37, 80, 0.09);
+  --shadow: 0 24px 70px rgba(1, 37, 80, 0.16);
 
   /* Fed into the WebGL scenes so 3D follows the page theme. */
-  --scene-beam: #8a7a68;
-  --scene-accent: #a57c52;
-  --scene-plate: #b3a695;
-  --scene-shell: #c9bda9;
-  --scene-interior: #d9cbb5;
-  --scene-soft: #b09a80;
+  --scene-beam: #525152;
+  --scene-accent: #012550;
+  --scene-plate: #949aa2;
+  --scene-shell: #b6bdc6;
+  --scene-interior: #c8cdd4;
+  --scene-soft: #a2a8b0;
 
   --radius: 2px;
-  --nav-height: 72px;
+  --nav-height: 76px;
   --gutter: clamp(1.25rem, 5vw, 5.5rem);
-  --section-y: clamp(5rem, 9vw, 8.5rem);
+  --section-y: clamp(3.25rem, 5.5vw, 5.5rem);
   --max-width: 1440px;
 
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -49,30 +51,30 @@
   background: var(--bg);
 }
 
-/* Dark mode stays in the same warm family: espresso rather than cool graphite,
-   with the brass lifted so it holds contrast against a dark ground. */
+/* Dark mode stays in the brand's own family: deep navy-black rather than neutral
+   graphite, with the navy lifted so it holds contrast against a dark ground. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16120f;
-    --bg-deep: #100d0b;
-    --surface: #1f1a16;
-    --surface-2: #2a231d;
-    --text: #f0e9e0;
-    --muted: rgba(240, 233, 224, 0.68);
-    --line: rgba(240, 233, 224, 0.15);
-    --line-strong: rgba(240, 233, 224, 0.3);
-    --accent: #c9a06a;
-    --accent-strong: #d9b586;
-    --accent-ink: #16120f;
-    --accent-soft: rgba(201, 160, 106, 0.16);
+    --bg: #0b1522;
+    --bg-deep: #070f19;
+    --surface: #121e2d;
+    --surface-2: #1a2838;
+    --text: #e9eef5;
+    --muted: rgba(233, 238, 245, 0.68);
+    --line: rgba(233, 238, 245, 0.15);
+    --line-strong: rgba(233, 238, 245, 0.30);
+    --accent: #6f9ed6;
+    --accent-strong: #8ab4e2;
+    --accent-ink: #071018;
+    --accent-soft: rgba(111, 158, 214, 0.16);
     --shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
 
-    --scene-beam: #9a8a76;
-    --scene-accent: #c9a06a;
-    --scene-plate: #6a5c4c;
-    --scene-shell: #4a3f34;
-    --scene-interior: #cbbca4;
-    --scene-soft: #96836c;
+    --scene-beam: #7d858f;
+    --scene-accent: #6f9ed6;
+    --scene-plate: #4a545f;
+    --scene-shell: #333d49;
+    --scene-interior: #b9c1cb;
+    --scene-soft: #79828d;
 
     color-scheme: dark;
   }
@@ -203,13 +205,35 @@ button {
 }
 
 .nav__brand {
+  display: flex;
+  align-items: center;
   background: none;
   border: 0;
   padding: 0;
   cursor: pointer;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  font-size: 1rem;
+}
+
+/* The nav carries the icon alone. The full stacked lockup would force the tagline
+   below 3px at this height, which is worse than not showing it. */
+.nav__logo {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
+.footer__logo {
+  display: block;
+  height: clamp(88px, 11vw, 132px);
+  width: auto;
+}
+
+/* The artwork is navy on grey. Against the dark ground both sink into the
+   background, so there it renders as a single off-white mark instead. */
+@media (prefers-color-scheme: dark) {
+  .nav__logo,
+  .footer__logo {
+    filter: brightness(0) invert(0.93);
+  }
 }
 
 .nav__links {
@@ -579,21 +603,185 @@ button {
   display: block;
 }
 
-.stack-list {
+/* Construction pillars ---------------------------------------------------- */
+.pillars-section {
   display: grid;
-  gap: 1.6rem;
-  margin-top: 1rem;
+  gap: clamp(2.5rem, 5vw, 4rem);
 }
 
-.stack-list__item {
+.pillars-section__copy {
   display: grid;
-  gap: 0.5rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--line);
+  gap: 1.2rem;
+  max-width: 46ch;
 }
 
-.stack-list__item p {
-  font-size: 0.94rem;
+/* A 1px gap over a line-coloured ground reads as one banded row rather than
+   four floating cards, which suits a company that builds things in sequence. */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pillar {
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
+  padding: clamp(1.4rem, 2.2vw, 2rem);
+  min-height: 15rem;
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+}
+
+/* The fill rises from the base, the way the work itself does. */
+.pillar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: 50% 100%;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pillar:hover::before {
+  transform: scaleY(1);
+}
+
+.pillar h3,
+.pillar p {
+  transition: color 0.4s ease;
+}
+
+.pillar:hover h3,
+.pillar:hover p {
+  color: var(--accent-ink);
+}
+
+.pillar p {
+  font-size: 0.92rem;
+}
+
+.pillar__rule {
+  display: block;
+  width: 2.25rem;
+  height: 2px;
+  margin-bottom: 0.5rem;
+  background: var(--accent);
+  transition: width 0.55s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
+}
+
+.pillar:hover .pillar__rule {
+  width: 100%;
+  background: var(--accent-ink);
+}
+
+/* Client work ------------------------------------------------------------- */
+.clients__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1rem, 2vw, 1.6rem);
+}
+
+.client {
+  margin: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.client figcaption {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.client__title {
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+}
+
+.client__name {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+/* Shorts are vertical, so the cards are 9:16 rather than landscape. */
+.client-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.client-video > button {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: block;
+}
+
+.client-video img,
+.client-video iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+.client-video img {
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.client-video:hover img {
+  transform: scale(1.04);
+}
+
+@media (max-width: 1024px) {
+  .clients__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.client-video__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4, 12, 24, 0.1), rgba(4, 12, 24, 0.45));
+}
+
+.client-video__play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--accent-ink);
+}
+
+.client-video__play svg {
+  width: 4.25rem;
+  height: 4.25rem;
+  padding: 1.15rem;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.client-video:hover .client-video__play svg {
+  transform: scale(1.08);
 }
 
 /* Section headers -------------------------------------------------------- */
@@ -873,20 +1061,25 @@ button {
 }
 
 /* Process ---------------------------------------------------------------- */
+/* The steps are centred against the image rather than stretched to match it, so
+   the timeline rule stays the length of the steps themselves. */
 .process__layout {
   display: grid;
   grid-template-columns: 5fr 7fr;
   gap: clamp(2rem, 5vw, 5rem);
-  align-items: start;
+  align-items: center;
 }
 
 .process__media {
-  position: sticky;
-  top: calc(var(--nav-height) + 3rem);
-  aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: var(--radius);
   background: var(--surface-2);
+}
+
+.process__media img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .process__steps {
@@ -941,60 +1134,6 @@ button {
   font-size: 0.95rem;
 }
 
-/* About and quotes ------------------------------------------------------- */
-.about {
-  display: grid;
-  grid-template-columns: 5fr 7fr;
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: start;
-}
-
-.about__media {
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
-  border-radius: var(--radius);
-  background: var(--surface-2);
-}
-
-.about__copy {
-  display: grid;
-  gap: 1.4rem;
-}
-
-.quotes {
-  display: grid;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-}
-
-.quote {
-  margin: 0;
-  display: grid;
-  gap: 0.75rem;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--line);
-}
-
-.quote blockquote {
-  margin: 0;
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  max-width: 48ch;
-}
-
-.quote figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-  font-size: 0.82rem;
-  color: var(--muted);
-}
-
-.quote figcaption span:first-child {
-  color: var(--text);
-}
-
 /* Contact ---------------------------------------------------------------- */
 .contact {
   display: grid;
@@ -1032,6 +1171,20 @@ button {
 .contact__details dd {
   margin: 0;
   font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.contact__details a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 1px;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+
+.contact__details a:hover {
+  color: var(--accent-strong);
+  border-bottom-color: var(--accent);
 }
 
 .contact-form {
@@ -1120,10 +1273,7 @@ button {
   gap: 1.5rem;
 }
 
-.footer__brand {
-  font-size: 1rem;
-  letter-spacing: -0.02em;
-}
+
 
 .footer__links {
   display: flex;
@@ -1200,8 +1350,7 @@ button {
   font-size: 0.8rem;
 }
 
-.modal__type,
-.modal__meta {
+.modal__type {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.14em;
@@ -1209,9 +1358,6 @@ button {
   color: var(--accent-strong);
 }
 
-.modal__meta {
-  color: var(--muted);
-}
 
 /* Mobile menu ------------------------------------------------------------ */
 .mobile-menu {
@@ -1268,21 +1414,25 @@ button {
 
   .split,
   .compare,
-  .about,
   .contact,
   .process__layout,
   .contact-form {
     grid-template-columns: 1fr;
   }
 
-  .split__copy,
   .process__media {
     position: static;
   }
 
-  .split__media,
-  .about__media,
-  .process__media {
+  .pillars {
+    grid-template-columns: 1fr;
+  }
+
+  .split__copy {
+    position: static;
+  }
+
+  .split__media {
     aspect-ratio: 4 / 3;
   }
 
@@ -1394,4 +1544,18 @@ button {
   .read-progress span {
     transform: scaleX(1);
   }
+}
+
+/* The client videos are presentation, not a player. Blocking pointer events stops
+   YouTube's hover overlay (title, channel name, share) from ever appearing, and
+   the frame is scaled slightly past the card so any residual edge furniture such
+   as the Shorts badge is cropped outside the visible area. */
+.client-video.is-playing iframe {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 132%;
+  height: 132%;
+  transform: translate(-50%, -50%);
 }

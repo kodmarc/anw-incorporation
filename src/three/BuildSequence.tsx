@@ -73,13 +73,13 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
     const beamMaterial = track(new THREE.MeshStandardMaterial({ color: beamColor, metalness: 0.45, roughness: 0.5 }));
     const accentMaterial = track(new THREE.MeshStandardMaterial({ color: accentColor, metalness: 0.3, roughness: 0.45 }));
     const shellMaterial = track(
-      new THREE.MeshStandardMaterial({ color: shellColor, roughness: 0.9, metalness: 0.05, transparent: true, opacity: 0 }),
+      new THREE.MeshStandardMaterial({ color: shellColor, roughness: 0.9, metalness: 0.05 }),
     );
     const interiorMaterial = track(
-      new THREE.MeshStandardMaterial({ color: interiorColor, roughness: 0.75, metalness: 0.05, transparent: true, opacity: 0 }),
+      new THREE.MeshStandardMaterial({ color: interiorColor, roughness: 0.75, metalness: 0.05 }),
     );
     const softMaterial = track(
-      new THREE.MeshStandardMaterial({ color: softColor, roughness: 0.95, metalness: 0, transparent: true, opacity: 0 }),
+      new THREE.MeshStandardMaterial({ color: softColor, roughness: 0.95, metalness: 0 }),
     );
 
     const root = new THREE.Group();
@@ -155,6 +155,8 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
     const interiorGroup = new THREE.Group();
     root.add(interiorGroup);
 
+    const interiorParts: THREE.Mesh[] = [];
+
     const addInterior = (
       material: THREE.Material,
       scale: [number, number, number],
@@ -163,7 +165,9 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
       const mesh = new THREE.Mesh(flatGeometry, material);
       mesh.scale.set(scale[0], scale[1], scale[2]);
       mesh.position.set(position[0], position[1], position[2]);
+      mesh.userData.finalScale = new THREE.Vector3(scale[0], scale[1], scale[2]);
       interiorGroup.add(mesh);
+      interiorParts.push(mesh);
       return mesh;
     };
 
@@ -176,7 +180,9 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
     addInterior(interiorMaterial, [2.6, 0.08, 0.5], [2.4, 1.6, 1.6]); // shelf
     const pendant = addInterior(accentMaterial, [0.6, 0.12, 0.6], [-0.4, 3.4, 1.1]);
 
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x14171d, 1.1);
+    // A lifted ground tone, so soffits and undersides read as surfaces in shadow
+    // rather than as black voids.
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x6a7482, 1.15);
     scene.add(hemi);
     const key = new THREE.DirectionalLight(0xffffff, 1.4);
     key.position.set(8, 12, 9);
@@ -197,8 +203,10 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
       new THREE.Vector3(19.5, 13, 22),
       new THREE.Vector3(15.5, 9.2, 17.5),
       new THREE.Vector3(10.5, 5.6, 13),
-      new THREE.Vector3(5.6, 2.9, 9),
-      new THREE.Vector3(2.6, 1.7, 6),
+      new THREE.Vector3(7.6, 4.6, 11.6),
+      // Stops outside the opening rather than pushing inside, so the finished room
+      // reads as a room instead of a wall of close-up blocks.
+      new THREE.Vector3(5.6, 3.3, 9.4),
     ]);
     const lookStart = new THREE.Vector3(0, 2.2, 0);
     const lookEnd = new THREE.Vector3(-0.8, 1.35, -0.8);
@@ -244,19 +252,33 @@ export function BuildSequence({ phases, reducedMotion }: BuildSequenceProps) {
         const appear = clampRange(shellPhase, index * 0.12, 0.6 + index * 0.1);
         wall.scale.y = 5.2 * Math.max(appear, 0.001);
       });
-      roof.visible = shellPhase > 0.55;
-      roof.position.y = 5.55 + (1 - clampRange(shellPhase, 0.55, 1)) * 1.6;
+      // The roof is fixed at its finished height and spreads outward from the
+      // centre. It is never shown floating above the walls with a gap under it.
+      const roofIn = clampRange(shellPhase, 0.7, 1);
+      const roofEase = roofIn * roofIn * (3 - 2 * roofIn);
+      roof.visible = roofIn > 0.01;
+      roof.scale.set(10.8 * Math.max(roofEase, 0.001), 0.2, 8.6 * Math.max(roofEase, 0.001));
 
-      // The pendant uses the opaque accent material, so the whole interior group is
-      // hidden until its phase begins rather than floating in the empty shell.
-      interiorGroup.visible = interiorPhase > 0.01;
-      interiorMaterial.opacity = interiorPhase;
-      softMaterial.opacity = interiorPhase;
+      // Nothing is on screen before its phase starts, so no invisible geometry is
+      // left sitting in the scene occluding what is behind it.
+      shellGroup.visible = shellPhase > 0.002;
+      interiorGroup.visible = interiorPhase > 0.002;
+
+      // Each piece of furniture grows into place on a slight stagger.
+      interiorParts.forEach((part, index) => {
+        const final = part.userData.finalScale as THREE.Vector3;
+        const appear = clampRange(interiorPhase, index * 0.07, 0.5 + index * 0.06);
+        const eased = appear * appear * (3 - 2 * appear);
+        part.scale.set(
+          final.x * Math.max(eased, 0.001),
+          final.y * Math.max(eased, 0.001),
+          final.z * Math.max(eased, 0.001),
+        );
+      });
+
       pendant.position.y = 3.4 - (1 - interiorPhase) * 0.5;
       warm.intensity = interiorPhase * 34;
       coolRim.intensity = 0.42 * (1 - interiorPhase * 0.6);
-      // The shell fades back once the interior arrives, so the room reads from inside.
-      shellMaterial.opacity = shellPhase * 0.96 * (1 - interiorPhase * 0.45);
 
       camera.position.copy(cameraPath.getPoint(THREE.MathUtils.clamp(progress, 0, 1)));
       lookAt.lerpVectors(lookStart, lookEnd, THREE.MathUtils.smoothstep(progress, 0.35, 1));

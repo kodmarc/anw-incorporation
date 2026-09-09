@@ -1,5 +1,6 @@
 import type { SectionId } from '../types';
 import { brand, navItems } from '../content';
+import logoMark from '../../assets/anw-mark.webp';
 
 type FloatingNavProps = {
   activeId: SectionId;
@@ -13,7 +14,7 @@ export function FloatingNav({ activeId, scrolled, menuOpen, onMenuChange, onNavi
   return (
     <header className={`nav ${scrolled ? 'is-scrolled' : ''}`}>
       <button className="nav__brand" type="button" onClick={() => onNavigate('intro')}>
-        {brand.name}
+        <img className="nav__logo" src={logoMark} alt={brand.name} width={280} height={118} />
       </button>
       <nav className="nav__links" aria-label="Primary navigation">
         {navItems.map((item) => (

@@ -6,14 +6,13 @@ export type SectionId =
   | 'projects'
   | 'journey'
   | 'process'
-  | 'about'
+  | 'clients'
   | 'contact';
 
 export type Project = {
   id: string;
   title: string;
   summary: string;
-  location: string;
   type: string;
   videoSrc: string;
   videoPosition: string;
@@ -43,9 +42,11 @@ export type TimelineStep = {
   description: string;
 };
 
-export type Testimonial = {
-  quote: string;
-  name: string;
-  projectType: string;
-  location: string;
+/** A client video hosted on YouTube. Only the video id is stored, never an embed. */
+export type ClientVideo = {
+  /** The id from the URL. For a Short, youtube.com/shorts/THIS_PART */
+  youtubeId: string;
+  /** Optional caption. Left off, the video runs without a label. */
+  title?: string;
+  client?: string;
 };

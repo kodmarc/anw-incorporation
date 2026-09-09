@@ -5,7 +5,8 @@ import { BeforeAfterSlider } from './components/BeforeAfterSlider';
 import { FloatingNav } from './components/FloatingNav';
 import { LazyVideo } from './components/LazyVideo';
 import { SectionHeader } from './components/SectionHeader';
-import { brand, buildPhases, constructionHighlights, cta, projects, sections, services, testimonials, timeline } from './content';
+import { YouTubeEmbed } from './components/YouTubeEmbed';
+import { brand, buildPhases, clientWork, constructionHighlights, contact, cta, projects, sections, services, timeline } from './content';
 import { useInteractions } from './hooks/useInteractions';
 import { useLenis } from './hooks/useLenis';
 import { useScrollScrubVideo } from './hooks/useScrollScrubVideo';
@@ -15,9 +16,8 @@ import { useScrollSpy } from './hooks/useScrollSpy';
 import type { Project } from './types';
 // The hero film, scrubbed by scroll.
 import heroVideo from '../assets/hero-scrub.mp4';
-import constructionVideo from '../assets/a.mp4';
-import aboutVideo from '../assets/g.mp4';
-import processVideo from '../assets/h.mp4';
+import logoLockup from '../assets/anw-lockup.webp';
+import processImage from '../assets/asset-image.jpeg';
 import beforeImage from '../assets/before.jpeg';
 import afterImage from '../assets/after.jpeg';
 
@@ -177,11 +177,13 @@ function App() {
   });
 
   // Nav state comes from a ScrollTrigger toggle, not a scroll listener.
+  // The end deliberately overshoots the document: with end "max" the trigger goes
+  // inactive at the very bottom of the page, dropping the nav's background exactly
+  // when the footer scrolls under it.
   useLayoutEffect(() => {
     const trigger = ScrollTrigger.create({
-      trigger: document.body,
-      start: 'top top-=64',
-      end: 'max',
+      start: 64,
+      end: () => ScrollTrigger.maxScroll(window) + 400,
       onToggle: (self) => setScrolled(self.isActive),
     });
     return () => trigger.kill();
@@ -221,6 +223,7 @@ function App() {
 
   const goTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+
   /**
    * Posts the enquiry to whichever hosted form service is configured in .env.
    * A static site cannot receive email on its own, but it does not need a backend
@@ -232,20 +235,21 @@ function App() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const endpoint = import.meta.env.VITE_ENQUIRY_ENDPOINT;
-
-    // Nothing configured yet, so say so plainly rather than faking a success.
-    if (!endpoint) {
-      setFormStatus('unconfigured');
-      return;
-    }
+    // Delivers to the studio inbox out of the box. Override with a different
+    // service (Formspree, Web3Forms) by setting VITE_ENQUIRY_ENDPOINT.
+    const endpoint =
+      import.meta.env.VITE_ENQUIRY_ENDPOINT || `https://formsubmit.co/ajax/${contact.email}`;
 
     setFormStatus('sending');
     try {
       const body = new FormData(form);
       const accessKey = import.meta.env.VITE_ENQUIRY_ACCESS_KEY;
       if (accessKey) body.append('access_key', accessKey);
-      body.append('subject', `New enquiry from the ${brand.name} website`);
+      const subject = `New enquiry from the ${brand.name} website`;
+      body.append('subject', subject);
+      body.append('_subject', subject);
+      body.append('_template', 'table');
+      body.append('_captcha', 'false');
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -253,7 +257,23 @@ function App() {
         headers: { Accept: 'application/json' },
       });
 
-      if (response.ok) {
+      // A 200 does not mean delivered. These services answer 200 with a body that
+      // says the send failed (an unactivated form, a bad key, a rejected address).
+      // Trusting the status code alone tells the visitor their enquiry arrived when
+      // it did not, and the enquiry is lost silently.
+      let delivered = response.ok;
+      try {
+        const result = await response.clone().json();
+        if (result && typeof result === 'object') {
+          if ('success' in result) delivered = String(result.success) === 'true';
+          else if ('ok' in result) delivered = result.ok === true;
+          if ('errors' in result || 'error' in result) delivered = false;
+        }
+      } catch {
+        // Not JSON. Fall back to the status code.
+      }
+
+      if (delivered) {
         setFormStatus('sent');
         form.reset();
       } else {
@@ -362,24 +382,22 @@ function App() {
           </div>
         </section>
 
-        <section className="split section" id="construction">
-          <div className="split__copy" data-reveal>
+        <section className="pillars-section section" id="construction">
+          <div className="pillars-section__copy" data-reveal>
             <h2>We build the structure the interior sits inside.</h2>
             <p>
               From shell works to fit-out and handover, the build stays practical, coordinated and aligned to the finished
               room from day one.
             </p>
-            <div className="stack-list">
-              {constructionHighlights.map((item) => (
-                <article className="stack-list__item" key={item.title}>
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </article>
-              ))}
-            </div>
           </div>
-          <div className="split__media" data-reveal data-parallax>
-            <LazyVideo className="split__video" src={constructionVideo} autoPlay loop muted playsInline />
+          <div className="pillars" data-reveal>
+            {constructionHighlights.map((item) => (
+              <article className="pillar" key={item.title}>
+                <span className="pillar__rule" aria-hidden="true" />
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -446,7 +464,12 @@ function App() {
           <SectionHeader eyebrow="Process" title="Five stages, one team." />
           <div className="process__layout">
             <div className="process__media" data-reveal>
-              <LazyVideo className="process__video" src={processVideo} autoPlay loop muted playsInline />
+              <img
+                src={processImage}
+                alt="Drawings, a scale ruler, oak, plaster and metal samples, and a hard hat laid out on a work table."
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <div className="process__steps">
               <div className="process__line" aria-hidden="true">
@@ -464,31 +487,31 @@ function App() {
           </div>
         </section>
 
-        <section className="about section" id="about">
-          <div className="about__media" data-reveal data-parallax>
-            <LazyVideo className="about__video" src={aboutVideo} autoPlay loop muted playsInline />
-          </div>
-          <div className="about__copy" data-reveal>
-            <h2>Built by people who stay until the last detail is right.</h2>
-            <p>
-              Construction, interior design, materials and craftsmanship sit in one studio, so nothing gets handed over a
-              fence halfway through.
-            </p>
-            <div className="quotes">
-              {testimonials.map((testimonial) => (
-                <figure className="quote" key={testimonial.quote}>
-                  <blockquote>{testimonial.quote}</blockquote>
-                  <figcaption>
-                    <span>{testimonial.name}</span>
-                    <span>
-                      {testimonial.projectType}, {testimonial.location}
-                    </span>
-                  </figcaption>
+        {clientWork.length > 0 ? (
+          <section className="clients section" id="clients">
+            <SectionHeader
+              title="Hear it from the people we built for."
+              description="Short conversations with clients about how the work actually went."
+            />
+            <div className="clients__grid" data-reveal>
+              {clientWork.map((video, index) => (
+                <figure className="client" key={`${video.youtubeId}-${index}`}>
+                  <YouTubeEmbed
+                    video={video}
+                    label={video.title ?? `${brand.name} client video ${index + 1}`}
+                    autoPlay={!reducedMotion}
+                  />
+                  {video.title || video.client ? (
+                    <figcaption>
+                      {video.title ? <span className="client__title">{video.title}</span> : null}
+                      {video.client ? <span className="client__name">{video.client}</span> : null}
+                    </figcaption>
+                  ) : null}
                 </figure>
               ))}
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="contact section" id="contact">
           <div className="contact__copy" data-reveal>
@@ -497,15 +520,25 @@ function App() {
             <dl className="contact__details">
               <div>
                 <dt>Email</dt>
-                <dd>[email address]</dd>
+                <dd>
+                  <a href={`mailto:${contact.email}`}>{contact.email}</a>
+                </dd>
               </div>
               <div>
                 <dt>Phone</dt>
-                <dd>[phone number]</dd>
+                <dd>
+                  <a href={`tel:${contact.phoneHref}`}>{contact.phone}</a>
+                </dd>
               </div>
               <div>
                 <dt>Studio</dt>
-                <dd>[studio address]</dd>
+                <dd>{contact.address}</dd>
+              </div>
+              <div>
+                <dt>Web</dt>
+                <dd>
+                  <a href={`https://${contact.website}`}>{contact.website}</a>
+                </dd>
               </div>
             </dl>
           </div>
@@ -534,6 +567,7 @@ function App() {
                 are here because the common form services look for different ones. */}
             <input className="contact-form__trap" type="text" name="botcheck" tabIndex={-1} autoComplete="off" />
             <input className="contact-form__trap" type="text" name="_gotcha" tabIndex={-1} autoComplete="off" />
+            <input className="contact-form__trap" type="text" name="_honey" tabIndex={-1} autoComplete="off" />
             <button className="button" type="submit" data-magnetic disabled={formStatus === 'sending'}>
               {formStatus === 'sending' ? 'Sending' : cta.contact}
             </button>
@@ -541,7 +575,7 @@ function App() {
               {formStatus === 'sent' ? 'Thanks. We will reply within two working days.' : null}
               {formStatus === 'failed' ? 'That did not send. Please email us directly and we will pick it up.' : null}
               {formStatus === 'unconfigured'
-                ? 'This form is not connected to an inbox yet. Please email us directly in the meantime.'
+                ? `Could not reach the mail service. Please email us at ${contact.email}.`
                 : null}
             </p>
           </form>
@@ -549,7 +583,7 @@ function App() {
 
         <footer className="footer">
           <div className="footer__top">
-            <span className="footer__brand">{brand.name}</span>
+            <img className="footer__logo" src={logoLockup} alt={brand.name} width={560} height={325} />
             <nav className="footer__links" aria-label="Footer navigation">
               {sections.map((section) => (
                 <button key={section.id} type="button" onClick={() => goTo(section.id)}>
@@ -576,7 +610,6 @@ function App() {
               <span className="modal__type">{selectedProject.type}</span>
               <h2>{selectedProject.title}</h2>
               <p>{selectedProject.summary}</p>
-              <span className="modal__meta">{selectedProject.location}</span>
             </div>
           </div>
         </div>

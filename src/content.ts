@@ -1,4 +1,4 @@
-import type { BuildPhase, ConstructionHighlight, Project, SectionId, Service, Testimonial, TimelineStep } from './types';
+import type { BuildPhase, ClientVideo, ConstructionHighlight, Project, SectionId, Service, TimelineStep } from './types';
 import projectVideoOne from '../assets/c.mp4';
 import projectVideoTwo from '../assets/d.mp4';
 import projectVideoThree from '../assets/a.mp4';
@@ -13,6 +13,15 @@ export const brand = {
   short: 'ANW',
 } as const;
 
+export const contact = {
+  email: 'anwincorporation@gmail.com',
+  phone: '0304 2760727',
+  // E.164 for the tel: link. Pakistan country code, leading zero dropped.
+  phoneHref: '+923042760727',
+  address: 'Office #202, 2nd Floor, 42C, 22nd Commercial Street, D.H.A Phase II Extension, Defence Housing Authority, Karachi, Sindh.',
+  website: 'anwincorporation.com',
+} as const;
+
 // One CTA label per intent (skill section 4.5). Contact intent uses "Start a project"
 // everywhere on the page. Portfolio intent uses "See our work".
 export const cta = {
@@ -20,21 +29,18 @@ export const cta = {
   work: 'See our work',
 } as const;
 
-export const navItems: Array<{ label: string; id: SectionId }> = [
+const baseNav: Array<{ label: string; id: SectionId }> = [
   { label: 'Interior', id: 'spaces' },
   { label: 'Services', id: 'services' },
   { label: 'Construction', id: 'construction' },
   { label: 'Journey', id: 'journey' },
   { label: 'Process', id: 'process' },
-  // Previously pointed at the hero, which meant "About" highlighted itself at the
-  // top of the page and scrolled nowhere.
-  { label: 'About', id: 'about' },
   { label: 'Contact', id: 'contact' },
 ];
 
 // Section numbers are deliberately absent: numbered eyebrows are a banned pattern
 // (skill section 9.F). These labels are used for the mobile menu and footer only.
-export const sections: Array<{ id: SectionId; label: string }> = [
+const baseSections: Array<{ id: SectionId; label: string }> = [
   { id: 'intro', label: 'Home' },
   { id: 'spaces', label: 'Interior' },
   { id: 'services', label: 'Services' },
@@ -42,7 +48,6 @@ export const sections: Array<{ id: SectionId; label: string }> = [
   { id: 'journey', label: 'Shell to interior' },
   { id: 'projects', label: 'Projects' },
   { id: 'process', label: 'Process' },
-  { id: 'about', label: 'About' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -120,7 +125,6 @@ export const projects: Project[] = [
     id: 'contemporary-residence',
     title: 'Contemporary residence',
     summary: 'Open-plan entertaining spaces with warm stone, custom millwork and layered lighting.',
-    location: '[Location]',
     type: 'Private residence',
     videoSrc: projectVideoOne,
     videoPosition: 'center center',
@@ -129,7 +133,6 @@ export const projects: Project[] = [
     id: 'warm-modern-home',
     title: 'Warm modern home',
     summary: 'Soft architectural lines and tactile materials shaping a family interior.',
-    location: '[Location]',
     type: 'Residential interior',
     videoSrc: projectVideoTwo,
     videoPosition: 'center 45%',
@@ -138,7 +141,6 @@ export const projects: Project[] = [
     id: 'minimal-residence',
     title: 'Minimal residence',
     summary: 'A calm house with precise proportions and carefully edited material contrast.',
-    location: '[Location]',
     type: 'Complete interior',
     videoSrc: projectVideoThree,
     videoPosition: 'center 30%',
@@ -147,7 +149,6 @@ export const projects: Project[] = [
     id: 'boutique-office-interior',
     title: 'Boutique office interior',
     summary: 'A compact work environment with warm finishes and a premium client-facing feel.',
-    location: '[Location]',
     type: 'Office interior',
     videoSrc: projectVideoFour,
     videoPosition: 'center 60%',
@@ -156,7 +157,6 @@ export const projects: Project[] = [
     id: 'complete-transformation',
     title: 'Complete home transformation',
     summary: 'A full spatial reset, from raw potential to an intimate living environment.',
-    location: '[Location]',
     type: 'Renovation',
     videoSrc: projectVideoFive,
     videoPosition: 'center 55%',
@@ -172,25 +172,31 @@ export const timeline: TimelineStep[] = [
   { title: 'Deliver', description: 'The house is handed over finished, snagged and ready to live in.' },
 ];
 
-// TODO(client): these are PLACEHOLDERS. Replace with real, permissioned client
-// quotes and names before publishing. Do not ship invented testimonials.
-export const testimonials: Testimonial[] = [
-  {
-    quote: 'The build team and the interior team behaved like one team, and the result feels completely ours.',
-    name: '[Client name]',
-    projectType: 'Design and build residence',
-    location: '[Location]',
-  },
-  {
-    quote: 'The house feels calm and properly resolved, from the shell right through to the finishes.',
-    name: '[Client name]',
-    projectType: 'Construction and interiors',
-    location: '[Location]',
-  },
-  {
-    quote: 'It reads less like a renovation and more like a house that already knew us.',
-    name: '[Client name]',
-    projectType: 'Renovation and interior design',
-    location: '[Location]',
-  },
+/**
+ * Client work videos.
+ *
+ * To add one: open the video on YouTube, copy the id out of the address bar, and
+ * add an entry below. In https://www.youtube.com/watch?v=dQw4w9WgXcQ the id is
+ * the part after "v=", so: dQw4w9WgXcQ
+ *
+ * The section is hidden while this list is empty, so nothing half-built ships.
+ * Nothing loads from YouTube until a visitor actually clicks a video.
+ */
+export const clientWork: ClientVideo[] = [
+  { youtubeId: 'xXmZD5WP7Z4' },
+  { youtubeId: '8TN7LYGulKE' },
+  { youtubeId: '2_cXE0ynIZE' },
+  { youtubeId: '22Qtmc1Wtuk' },
 ];
+
+// A link to a section that does not exist scrolls nowhere, so the client work
+// entries are only added once there is at least one video.
+const clientEntry = { label: 'Client work', id: 'clients' as SectionId };
+
+export const navItems = clientWork.length
+  ? [...baseNav.slice(0, -1), clientEntry, ...baseNav.slice(-1)]
+  : baseNav;
+
+export const sections = clientWork.length
+  ? [...baseSections.slice(0, -1), { id: clientEntry.id, label: clientEntry.label }, ...baseSections.slice(-1)]
+  : baseSections;
