@@ -375,11 +375,12 @@ button {
     180deg,
     color-mix(in srgb, var(--bg) 62%, transparent) 0%,
     color-mix(in srgb, var(--bg) 8%, transparent) 22%,
-    color-mix(in srgb, var(--bg) 55%, transparent) 44%,
-    color-mix(in srgb, var(--bg) 88%, transparent) 62%,
-    /* Fully opaque well before the edge, then solid the rest of the way. Reaching
-       solid only at 100% left a band of video showing above the section join. */
-    var(--bg) 78%,
+    color-mix(in srgb, var(--bg) 52%, transparent) 40%,
+    color-mix(in srgb, var(--bg) 90%, transparent) 56%,
+    /* Solid from here down. The ramp used to still be a few percent transparent
+       behind the copy, which let bright parts of the frame show through on the
+       right hand side where there is no text to hide them. */
+    var(--bg) 66%,
     var(--bg) 100%
   );
 }
