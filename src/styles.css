@@ -374,9 +374,12 @@ button {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--bg) 62%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 8%, transparent) 24%,
-    color-mix(in srgb, var(--bg) 58%, transparent) 48%,
-    color-mix(in srgb, var(--bg) 93%, transparent) 68%,
+    color-mix(in srgb, var(--bg) 8%, transparent) 22%,
+    color-mix(in srgb, var(--bg) 55%, transparent) 44%,
+    color-mix(in srgb, var(--bg) 88%, transparent) 62%,
+    /* Fully opaque well before the edge, then solid the rest of the way. Reaching
+       solid only at 100% left a band of video showing above the section join. */
+    var(--bg) 78%,
     var(--bg) 100%
   );
 }
