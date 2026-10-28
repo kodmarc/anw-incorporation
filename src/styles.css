@@ -406,72 +406,21 @@ button {
   max-width: var(--max-width);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  align-items: end;
-  gap: clamp(2rem, 5vw, 5rem);
-}
-
-.statement__head {
-  display: grid;
-  gap: 1.25rem;
+  gap: clamp(2rem, 5vw, 4rem);
 }
 
 .statement__type {
-  font-size: clamp(2.4rem, 6vw, 5.25rem);
+  font-size: clamp(2.4rem, 7vw, 6rem);
   line-height: 1.02;
   max-width: 16ch;
 }
 
-/* The copy column hangs off an accent rule so the company name reads as the
-   section's anchor rather than another line of body text. */
-.statement__copy {
-  display: grid;
-  gap: 1.25rem;
-  max-width: 48ch;
-  padding-left: clamp(1.25rem, 2.5vw, 2rem);
-  border-left: 2px solid var(--accent-strong);
-}
-
-.statement__lead {
-  margin: 0;
-  font-size: clamp(1.15rem, 1.6vw, 1.4rem);
-  line-height: 1.4;
-  letter-spacing: -0.01em;
-}
-
-.statement__lead strong {
-  font-weight: 600;
-  color: var(--accent-strong);
-}
-
 .statement__body {
-  margin: 0;
+  justify-self: end;
+  max-width: 44ch;
   font-size: 1.02rem;
-  color: var(--muted);
-}
-
-.statement__facts {
-  margin: 0.5rem 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
   border-top: 1px solid var(--line);
   padding-top: 1.25rem;
-}
-
-.statement__facts dt {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.35rem;
-}
-
-.statement__facts dd {
-  margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.35;
 }
 
 /* Services rail ---------------------------------------------------------- */
@@ -1491,12 +1440,8 @@ button {
     aspect-ratio: 4 / 3;
   }
 
-  .statement {
-    grid-template-columns: 1fr;
-  }
-
-  .statement__facts {
-    grid-template-columns: 1fr;
+  .statement__body {
+    justify-self: start;
   }
 
   .projects__grid {
@@ -1608,13 +1553,34 @@ button {
 /* The client videos are presentation, not a player. Blocking pointer events stops
    YouTube's hover overlay (title, channel name, share) from ever appearing, and
    the frame is scaled slightly past the card so any residual edge furniture such
-   as the Shorts badge is cropped outside the visible area. */
+   as the Shorts badge is cropped outside the visible area.
+
+   The frame is laid out at a fixed desktop card size (300 x 533) and scaled by
+   --yt-scale, set from the card's real width, so YouTube's pixel-sized overlay
+   shrinks with the card on phones instead of spilling past the crop. */
 .client-video.is-playing iframe {
+  --yt-crop: 1.32;
   pointer-events: none;
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 132%;
-  height: 132%;
-  transform: translate(-50%, -50%);
+  width: calc(300px * var(--yt-crop));
+  height: calc(533.33px * var(--yt-crop));
+  max-width: none;
+  transform: translate(-50%, -50%) scale(var(--yt-scale, 1));
+}
+
+/* The mobile player draws a taller title bar and a "tap to unmute" pill, so phones
+   crop a little deeper. */
+@media (max-width: 768px) {
+  .client-video.is-playing iframe {
+    --yt-crop: 1.45;
+  }
+}
+
+.client-video__poster {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  pointer-events: none;
 }
