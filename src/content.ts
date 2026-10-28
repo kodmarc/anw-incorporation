@@ -9,7 +9,7 @@ import serviceVideoTwo from '../assets/3.mp4';
 import serviceVideoThree from '../assets/f.mp4';
 
 export const brand = {
-  name: 'ANW Incorporation',
+  name: 'ANW Incorporation SMC PVT Limited',
   short: 'ANW',
 } as const;
 
