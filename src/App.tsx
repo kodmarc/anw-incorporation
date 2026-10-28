@@ -343,17 +343,40 @@ function App() {
         </section>
 
         <section className="statement" id="spaces" data-statement-section>
-          <h2 className="statement__type">
-            {['Structure first.', 'Then light,', 'material, and calm.'].map((line) => (
-              <span className="line" key={line}>
-                <span data-statement-line>{line}</span>
-              </span>
-            ))}
-          </h2>
-          <p className="statement__body" data-reveal>
-            Most houses are designed by one company and built by another. The gap between them is where budgets slip and
-            details get lost. We hold both sides, so the drawing and the build stay the same idea.
-          </p>
+          <div className="statement__head">
+            <p className="eyebrow">About us</p>
+            <h2 className="statement__type">
+              {['Structure first.', 'Then light,', 'material, and calm.'].map((line) => (
+                <span className="line" key={line}>
+                  <span data-statement-line>{line}</span>
+                </span>
+              ))}
+            </h2>
+          </div>
+          <div className="statement__copy" data-reveal>
+            <p className="statement__lead">
+              <strong>{brand.name}</strong> is a Karachi design and build studio, one team for residential construction
+              and interior design.
+            </p>
+            <p className="statement__body">
+              Most houses are designed by one company and built by another. The gap between them is where budgets slip
+              and details get lost. We hold both sides, so the drawing and the build stay the same idea.
+            </p>
+            <dl className="statement__facts">
+              <div>
+                <dt>Based in</dt>
+                <dd>Karachi, Pakistan</dd>
+              </div>
+              <div>
+                <dt>Disciplines</dt>
+                <dd>Construction and interiors</dd>
+              </div>
+              <div>
+                <dt>Delivery</dt>
+                <dd>One team, start to finish</dd>
+              </div>
+            </dl>
+          </div>
         </section>
 
         <section className="rail-section" id="services" data-rail-wrap>
